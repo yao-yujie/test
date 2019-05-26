@@ -65,4 +65,4 @@ def inspect_GRB(bnname):
 # DO NOT REMOVE THIS PART #
 if __name__ == '__main__':
 	main()
-
+#This is guthub interactive testing from Zou Jinhang
