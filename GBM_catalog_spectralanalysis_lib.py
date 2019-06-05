@@ -298,7 +298,7 @@ class GRB:
 		AllData(alldatastr)
 		AllData.show()
 		AllData.ignore('1:**-200.0,40000.0-** 2-3:**-8.0,800.0-**')
-		Model('bbody+cutoffpl')
+		Model('bbody+grbm')
 		Fit.nIterations=1000
 		Fit.statMethod='pgstat'
 		Fit.query = "yes"
@@ -313,6 +313,7 @@ class GRB:
 		Plot.xAxis='keV'
 		Plot.yLog=True
 		Plot('eeufspec')
+
 		for i in (1,2,3):
 			energies=Plot.x(i)
 			rates=Plot.y(i)
@@ -326,6 +327,7 @@ class GRB:
 		plt.savefig('foldedspec.png')
 		plt.close()
 		Plot('eeufspec')
+
 		for i in (1,2,3):
 			energies=Plot.x(i)
 			ufspec=Plot.y(i)
@@ -347,4 +349,5 @@ grb=GRB('bn190114873')
 grb.base(baset1=-50,baset2=200,binwidth=0.064)
 grb.phaI(slicet1= 1.9,slicet2=3.9)
 grb.specanalyze('slice'+str(0))
+grb.removebase()
 	
