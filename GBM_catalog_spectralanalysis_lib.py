@@ -298,7 +298,7 @@ class GRB:
 		AllData(alldatastr)
 		AllData.show()
 		AllData.ignore('1:**-200.0,40000.0-** 2-3:**-8.0,800.0-**')
-		Model('bbody+grbm')
+		Model('bbody+cutoffpl')
 		Fit.nIterations=1000
 		Fit.statMethod='pgstat'
 		Fit.query = "yes"
