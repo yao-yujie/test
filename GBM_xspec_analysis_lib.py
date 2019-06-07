@@ -1,8 +1,9 @@
 # General analyses of GBM catalog bursts 
 # last modified: Apr. 29, 2019
-import matplotlib.pyplot as plt
+
 from astropy.io import fits
 from astropy.time import Time
+import matplotlib.pyplot as plt
 from glob import glob
 import pandas as pd
 import numpy as np
@@ -22,7 +23,7 @@ robjects.r("library(baseline)")
 from xspec import *
 
 
-
+#databasedir='/home/yao/bn'
 databasedir='/home/yujie/downburstdata/data'
 
 NaI=['n0','n1','n2','n3','n4','n5','n6','n7','n8','n9','na','nb']
@@ -99,7 +100,6 @@ def copy_rspI(bnname,det,outfile):
 	rspfile=rspfile[0]
 	os.system('cp '+rspfile+' '+outfile)
 	
-
 
 class GRB:
 	def __init__(self,bnname):
@@ -293,15 +293,16 @@ class GRB:
 		NaIindex=np.argsort(NaItotal)
 		brightdet=[BGO[BGOindex[-1]],NaI[NaIindex[-1]],NaI[NaIindex[-2]]]
 		
-		# use xspec	
-		#alldatastr=' '.join([det+'.pha' for det in brightdet])
-		alldatastr='b0.pha n4.pha n3.pha'
+		# use xspec
+
+		#alldatastr='b0.pha n4.pha n3.pha'	
+		alldatastr=' '.join([det+'.pha' for det in brightdet])
 		#print(alldatastr)
 		#input('--wait--')
 		AllData(alldatastr)
 		AllData.show()
 		AllData.ignore('1:**-200.0,40000.0-** 2-3:**-8.0,800.0-**')
-		Model('grbm+bbody')
+		Model('grbm')
 		Fit.nIterations=1000
 		Fit.statMethod='pgstat'
 		Fit.query = "yes"
@@ -350,7 +351,7 @@ class GRB:
 
 grb=GRB('bn190114873')
 grb.base(baset1=-50,baset2=200,binwidth=0.064)
-grb.phaI(slicet1= 1.9,slicet2=3.9)
+grb.phaI(slicet1= 1.9,slicet2=3.99)
 grb.specanalyze('slice'+str(0))
 #grb.removebase()
 	
