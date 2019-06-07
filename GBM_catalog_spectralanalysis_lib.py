@@ -23,7 +23,7 @@ from xspec import *
 
 
 
-databasedir='/home/yao/bn'
+databasedir='/home/yujie/downburstdata/data'
 
 NaI=['n0','n1','n2','n3','n4','n5','n6','n7','n8','n9','na','nb']
 BGO=['b0','b1']
@@ -294,18 +294,21 @@ class GRB:
 		brightdet=[BGO[BGOindex[-1]],NaI[NaIindex[-1]],NaI[NaIindex[-2]]]
 		
 		# use xspec	
-		alldatastr=' '.join([det+'.pha' for det in brightdet])
+		#alldatastr=' '.join([det+'.pha' for det in brightdet])
+		alldatastr='b0.pha n4.pha n3.pha'
+		#print(alldatastr)
+		#input('--wait--')
 		AllData(alldatastr)
 		AllData.show()
 		AllData.ignore('1:**-200.0,40000.0-** 2-3:**-8.0,800.0-**')
-		Model('bbody+cutoffpl')
+		Model('grbm+bbody')
 		Fit.nIterations=1000
 		Fit.statMethod='pgstat'
 		Fit.query = "yes"
 		Fit.perform()
-		Fit.error('3.0 5')
+		Fit.error('3.0 3')
 		Fit.perform()
-		par5=AllModels(1)(5)
+		par5=AllModels(1)(3)
 		print(par5.error)
 
 		
@@ -349,5 +352,5 @@ grb=GRB('bn190114873')
 grb.base(baset1=-50,baset2=200,binwidth=0.064)
 grb.phaI(slicet1= 1.9,slicet2=3.9)
 grb.specanalyze('slice'+str(0))
-grb.removebase()
+#grb.removebase()
 	
