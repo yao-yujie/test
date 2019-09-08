@@ -23,8 +23,8 @@ robjects.r("library(baseline)")
 from xspec import *
 
 
-#databasedir='/home/yao/bn'
-databasedir='/home/yujie/downburstdata/data'
+databasedir='/home/yao/bn'
+#databasedir='/home/yujie/downburstdata/data'
 
 NaI=['n0','n1','n2','n3','n4','n5','n6','n7','n8','n9','na','nb']
 BGO=['b0','b1']
@@ -297,20 +297,23 @@ class GRB:
 
 		#alldatastr='b0.pha n4.pha n3.pha'	
 		alldatastr=' '.join([det+'.pha' for det in brightdet])
-		#print(alldatastr)
+		print(alldatastr)
 		#input('--wait--')
 		AllData(alldatastr)
 		AllData.show()
 		AllData.ignore('1:**-200.0,40000.0-** 2-3:**-8.0,800.0-**')
+		print(AllData.notice)
 		Model('grbm')
-		Fit.nIterations=1000
 		Fit.statMethod='pgstat'
+		Fit.nIterations=1000
 		Fit.query = "yes"
 		Fit.perform()
+
 		Fit.error('3.0 3')
 		Fit.perform()
-		par5=AllModels(1)(3)
-		print(par5.error)
+
+		par3=AllModels(1)(3)
+		print(par3.error)
 
 		
 		Plot.device='/xs'
