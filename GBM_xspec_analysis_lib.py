@@ -352,9 +352,9 @@ class GRB:
 		os.system('rm -rf '+self.baseresultdir)
 
 
-grb=GRB('bn190114873')
+grb=GRB('bn110920546')
 grb.base(baset1=-50,baset2=200,binwidth=0.064)
-grb.phaI(slicet1= 1.9,slicet2=3.99)
+grb.phaI(slicet1=51,slicet2=55)
 grb.specanalyze('slice'+str(0))
 #grb.removebase()
 	
