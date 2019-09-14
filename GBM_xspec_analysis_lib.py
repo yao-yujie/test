@@ -11,6 +11,7 @@ import h5py
 from scipy import stats
 import os
 import sys
+import re
 from multiprocessing import Pool
 import warnings
 from rpy2.rinterface import RRuntimeWarning
@@ -22,7 +23,7 @@ robjects.numpy2ri.activate()
 robjects.r("library(baseline)")
 from xspec import *
 
-
+bnname='bn110920546'
 databasedir='/home/yao/bn'
 #databasedir='/home/yujie/downburstdata/data'
 
@@ -34,6 +35,61 @@ ch1=3
 ch2=124
 ncore=10
 
+
+def get_usersjar():
+    usersjar = "/home/yao/Software/users.jar"
+    return usersjar
+
+def query_fermigbrst(cdir='./'):
+    fermigbrst = cdir+'/fermigbrst_test.txt'
+    if not os.path.exists(fermigbrst):
+        usersjar = get_usersjar()
+        assert os.path.exists(usersjar), """'users.jar' is not available! 
+            download users.jar at:
+            https://heasarc.gsfc.nasa.gov/xamin/distrib/users.jar
+            and update the path of usersjar in 'personal_settings.py'."""
+        java_ready = os.system("java --version")
+        assert not java_ready, """java not properly installed!
+            Install Oracle Java 10 (JDK 10) in Ubuntu or Linux Mint from PPA
+            $ sudo add-apt-repository ppa:linuxuprising/java
+            $ sudo apt update
+            $ sudo apt install oracle-java10-installer"""
+        fields = ("trigger_name,t90,t90_error,t90_start,"
+            "Flnc_Band_Epeak,scat_detector_mask")
+        print('querying fermigbrst catalog using HEASARC-Xamin-users.jar ...')
+        query_ready = os.system("java -jar "+usersjar+" table=fermigbrst fields="
+                +fields+" sortvar=trigger_name output="+cdir+"/fermigbrst_test.txt")
+        assert not query_ready, 'failed in querying fermigbrst catalog!'
+        print('successful in querying fermigbrst catalog!')
+    return fermigbrst
+
+fermigbrst = query_fermigbrst()
+df = pd.read_csv(fermigbrst,delimiter='|',header=0,skipfooter=3,engine='python')
+trigger_name = df['trigger_name'].apply(lambda x:x.strip()).values
+t90_str = df[df.columns[1]].apply(lambda x:x.strip()).values
+#print(df.columns[1])
+t90_error_str = df[df.columns[2]].apply(lambda x:x.strip()).values
+t90_start_str = df[df.columns[3]].apply(lambda x:x.strip()).values
+Flnc_Band_Epeak_str = df[df.columns[4]].apply(lambda x:x.strip()).values
+scat_detector_mask_str = df[df.columns[5]].apply(lambda x:x.strip()).values
+burst_number = len(trigger_name)
+print('burst_number = ',burst_number)
+
+number=trigger_name.tolist().index(bnname)
+
+a=float(t90_start_str[number])
+b=float(t90_str[number])+float(t90_start_str[number])
+print(a,b)
+
+det1=['n0','n1','n2','n3','n4','n5','n6','n7','n8','n9','na','nb','b0','b1']
+mask_str=scat_detector_mask_str[number]
+mask = [m.start() for m in re.finditer('1', scat_detector_mask_str[number])]
+print (mask)
+l=len(mask)
+
+#for i in mask[:]:
+#	use_mask=det1[i]+'.pha'
+#	print(use_mask)
 
 def norm_pvalue(sigma=2.0):
 	p = stats.norm.cdf(sigma)-stats.norm.cdf(-sigma)
@@ -156,6 +212,48 @@ class GRB:
 			self.GTI1=np.max(GTI_t1)
 			self.GTI2=np.min(GTI_t2)
 
+
+	def rawlc(self,viewt1=-50,viewt2=300,binwidth=0.1):		
+		viewt1=np.max([self.GTI1,viewt1])
+		viewt2=np.min([self.GTI2,viewt2])
+		assert viewt1<viewt2, self.bnname+': Inappropriate view times for rawlc!'
+		if not os.path.exists(self.resultdir+'/'+'raw_lc.png'):
+			#print('plotting raw_lc.png ...')
+			tbins=np.arange(viewt1,viewt2+binwidth,binwidth)
+			fig, axes= plt.subplots(7,2,figsize=(32, 20),sharex=True,sharey=False)
+			for i in range(14):
+				ttefile=glob(self.datadir+'/'+'glg_tte_'+Det[i]+'_'+self.bnname+'_v*.fit')
+				hdu=fits.open(ttefile[0])
+				trigtime=hdu['Primary'].header['TRIGTIME']
+				data=hdu['EVENTS'].data
+				time=data.field(0)-trigtime
+				ch=data.field(1)
+				#data in firt and last two channels of BGO and NaI are not used
+				#ignore 0,1,2,125,126,127, notice 3-124
+				goodindex=(ch>=ch1) & (ch<=ch2)  
+				time=time[goodindex]
+				ebound=hdu['EBOUNDS'].data
+				emin=ebound.field(1)
+				emin=emin[ch1:ch2+1]
+				emax=ebound.field(2)
+				emax=emax[ch1:ch2+1]
+				histvalue, histbin =np.histogram(time,bins=tbins)
+				plotrate=histvalue/binwidth
+				plotrate=np.concatenate(([plotrate[0]],plotrate))
+				axes[i//2,i%2].plot(histbin,plotrate,linestyle='steps')
+				axes[i//2,i%2].set_xlim([viewt1,viewt2])
+				axes[i//2,i%2].tick_params(labelsize=25)
+				axes[i//2,i%2].text(0.05,0.85,Det[i],transform=\
+									axes[i//2,i%2].transAxes,fontsize=25)
+				axes[i//2,i%2].text(0.7,0.80,str(round(emin[0],1))+'-'+\
+										str(round(emax[-1],1))+' keV',\
+								transform=axes[i//2,i%2].transAxes,fontsize=25)
+			fig.text(0.07, 0.5, 'Count rate (count/s)', ha='center', va='center',\
+												 rotation='vertical',fontsize=30)
+			fig.text(0.5, 0.05, 'Time (s)', ha='center', va='center',fontsize=30)		
+			fig.text(0.5, 0.92, self.bnname, ha='center', va='center',fontsize=30)
+			plt.savefig(self.resultdir+'/raw_lc.png')
+			plt.close()
 
 
 	def base(self,baset1=-50,baset2=300,binwidth=0.1):
@@ -295,13 +393,13 @@ class GRB:
 		
 		# use xspec
 
-		#alldatastr='b0.pha n4.pha n3.pha'	
-		alldatastr=' '.join([det+'.pha' for det in brightdet])
+		alldatastr=' '.join(det1[i]+'.pha' for i in mask)
+		#alldatastr=' '.join([det+'.pha' for det in brightdet])
 		print(alldatastr)
 		#input('--wait--')
 		AllData(alldatastr)
 		AllData.show()
-		AllData.ignore('1:**-200.0,40000.0-** 2-3:**-8.0,800.0-**')
+		AllData.ignore('1-(l-1):**-8.0,800.0-**  l:**-200.0,40000.0-**')
 		print(AllData.notice)
 		Model('grbm')
 		Fit.statMethod='pgstat'
@@ -321,7 +419,7 @@ class GRB:
 		Plot.yLog=True
 		Plot('eeufspec')
 
-		for i in (1,2,3):
+		for i in (1,2,3,4):
 			energies=Plot.x(i)
 			rates=Plot.y(i)
 			folded=Plot.model(i)
@@ -335,7 +433,7 @@ class GRB:
 		plt.close()
 		Plot('eeufspec')
 
-		for i in (1,2,3):
+		for i in (1,2,3,4):
 			energies=Plot.x(i)
 			ufspec=Plot.y(i)
 			folded=Plot.model(i)
@@ -346,15 +444,20 @@ class GRB:
 		plt.xscale('log')
 		plt.yscale('log')
 		plt.savefig('eeufspec.png')
-		plt.close()
+		plt.close()		
+
+	def removebase(self):
+		os.system('rm -rf '+self.baseresultdir)
+		
 
 	def removebase(self):
 		os.system('rm -rf '+self.baseresultdir)
 
 
-grb=GRB('bn110920546')
+grb=GRB(bnname)
+grb.rawlc(viewt1=-50,viewt2=300,binwidth=0.064)
 grb.base(baset1=-50,baset2=200,binwidth=0.064)
-grb.phaI(slicet1=51,slicet2=55)
+grb.phaI(slicet1=a,slicet2=b)
 grb.specanalyze('slice'+str(0))
 #grb.removebase()
 	
