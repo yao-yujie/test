@@ -421,7 +421,7 @@ class GRB:
 		Plot.yLog=True
 		Plot('eeufspec')
 
-		for i in (np.arange(1,1+l)):
+		for i in (1,2,3,4):
 			i=i.astype(int)
 			energies=Plot.x(i)
 			rates=Plot.y(i)
@@ -436,7 +436,7 @@ class GRB:
 		plt.close()
 		Plot('eeufspec')
 
-		for i in (np.arange(1,1+l)):
+		for i in (1,2,3,4):
 			i=i.astype(int)
 			energies=Plot.x(i)
 			ufspec=Plot.y(i)
