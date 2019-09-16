@@ -87,6 +87,8 @@ mask = [m.start() for m in re.finditer('1', scat_detector_mask_str[number])]
 print (mask)
 l=len(mask)
 
+
+
 #for i in mask[:]:
 #	use_mask=det1[i]+'.pha'
 #	print(use_mask)
@@ -420,6 +422,7 @@ class GRB:
 		Plot('eeufspec')
 
 		for i in (np.arange(1,1+l)):
+			i=i.astype(int)
 			energies=Plot.x(i)
 			rates=Plot.y(i)
 			folded=Plot.model(i)
@@ -434,6 +437,7 @@ class GRB:
 		Plot('eeufspec')
 
 		for i in (np.arange(1,1+l)):
+			i=i.astype(int)
 			energies=Plot.x(i)
 			ufspec=Plot.y(i)
 			folded=Plot.model(i)
