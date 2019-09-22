@@ -87,6 +87,7 @@ mask = [m.start() for m in re.finditer('1', scat_detector_mask_str[number])]
 print (mask)
 l=len(mask)
 
+tem=open('tem.txt','w')
 
 
 #for i in mask[:]:
@@ -413,7 +414,8 @@ class GRB:
 		Fit.perform()
 
 		par3=AllModels(1)(3)
-		print(par3.error)
+		print(bnname,par3.values[0],par3.error[0],end='',file=tem)
+		tem.close()
 
 		
 		Plot.device='/xs'
@@ -450,11 +452,6 @@ class GRB:
 
 	def removebase(self):
 		os.system('rm -rf '+self.baseresultdir)
-		
-
-	def removebase(self):
-		os.system('rm -rf '+self.baseresultdir)
-
 
 grb=GRB(bnname)
 grb.rawlc(viewt1=-50,viewt2=300,binwidth=0.064)
