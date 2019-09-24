@@ -23,7 +23,7 @@ robjects.numpy2ri.activate()
 robjects.r("library(baseline)")
 from xspec import *
 
-bnname='bn110920546'
+bnname='bn130206482'
 databasedir='/home/yao/bn'
 #databasedir='/home/yujie/downburstdata/data'
 
@@ -86,7 +86,7 @@ mask_str=scat_detector_mask_str[number]
 mask = [m.start() for m in re.finditer('1', scat_detector_mask_str[number])]
 print (mask)
 l=len(mask)
-
+Epeak=Flnc_Band_Epeak_str[number]
 tem=open('tem.txt','w')
 
 
@@ -414,7 +414,7 @@ class GRB:
 		Fit.perform()
 
 		par3=AllModels(1)(3)
-		print(bnname,par3.values[0],par3.error[0],end='',file=tem)
+		print(bnname,Epeak*100,par3.values[0],par3.error[0],end='',file=tem)
 		tem.close()
 
 		
