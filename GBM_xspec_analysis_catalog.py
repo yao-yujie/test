@@ -23,8 +23,8 @@ robjects.numpy2ri.activate()
 robjects.r("library(baseline)")
 from xspec import *
 
-bnname='bn130206482'
-databasedir='/home/yao/bn'
+bnname='bn170816599'
+databasedir='/home/yao/burstdownloadyears'
 #databasedir='/home/yujie/downburstdata/data'
 
 NaI=['n0','n1','n2','n3','n4','n5','n6','n7','n8','n9','na','nb']
@@ -414,7 +414,7 @@ class GRB:
 		Fit.perform()
 
 		par3=AllModels(1)(3)
-		print(bnname,Epeak*100,par3.values[0],par3.error[0],end='',file=tem)
+		print(bnname,Epeak,par3.values[0],par3.error[0],end='',file=tem)
 		tem.close()
 
 		
