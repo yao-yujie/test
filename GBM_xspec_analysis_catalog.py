@@ -23,7 +23,7 @@ robjects.numpy2ri.activate()
 robjects.r("library(baseline)")
 from xspec import *
 
-name=['bn110920546','bn080723985']
+name=['bn180525151','bn170705115']
 nl=len(name)
 databasedir='/home/yao/burstdownloadyears'
 #databasedir='/home/yujie/downburstdata/data'
@@ -450,14 +450,7 @@ for n in range(nl):
 	number=trigger_name.tolist().index(bnname)
 	a=float(t90_start_str[number])
 	b=float(t90_str[number])+float(t90_start_str[number])
-	
 	print(a,b)
-
-	det1=['n0','n1','n2','n3','n4','n5','n6','n7','n8','n9','na','nb','b0','b1']
-	mask_str=scat_detector_mask_str[number]
-	mask = [m.start() for m in re.finditer('1', scat_detector_mask_str[number])]
-	print (mask)
-	l=len(mask)
 	Epeak=Flnc_Band_Epeak_str[number]
 
 	grb=GRB(bnname)
