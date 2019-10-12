@@ -23,7 +23,9 @@ robjects.numpy2ri.activate()
 robjects.r("library(baseline)")
 from xspec import *
 
-name=['bn180525151','bn170705115']
+name = []
+for line in open("sample.txt","r"):              
+	name.append(line[:11])
 nl=len(name)
 databasedir='/home/yao/burstdownloadyears'
 #databasedir='/home/yujie/downburstdata/data'
@@ -386,8 +388,8 @@ class GRB:
 		
 		# use xspec
 
-		alldatastr='n6.pha n7.pha b1.pha '
-		#alldatastr=' '.join([det+'.pha' for det in brightdet])
+		#alldatastr='n6.pha n7.pha b1.pha '
+		alldatastr=' '.join([det+'.pha' for det in brightdet])
 		print(alldatastr)
 		#input('--wait--')
 		AllData(alldatastr)

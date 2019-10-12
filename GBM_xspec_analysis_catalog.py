@@ -23,7 +23,10 @@ robjects.numpy2ri.activate()
 robjects.r("library(baseline)")
 from xspec import *
 
-name=['bn180525151','bn170705115']
+#name=['bn180525151','bn170705115']
+name = []
+for line in open("sample.txt","r"):              
+	name.append(line[:11])
 nl=len(name)
 databasedir='/home/yao/burstdownloadyears'
 #databasedir='/home/yujie/downburstdata/data'
@@ -452,7 +455,10 @@ for n in range(nl):
 	b=float(t90_str[number])+float(t90_start_str[number])
 	print(a,b)
 	Epeak=Flnc_Band_Epeak_str[number]
-
+	mask=scat_detector_mask_str[number]
+	det1=['n0','n1','n2','n3','n4','n5','n6','n7','n8','n9','na','nb','b0','b1']
+	mask = [m.start() for m in re.finditer('1', scat_detector_mask_str[number])]
+	l=len(mask)
 	grb=GRB(bnname)
 	grb.rawlc(viewt1=-50,viewt2=300,binwidth=0.064)
 	grb.base(baset1=-50,baset2=200,binwidth=0.064)
